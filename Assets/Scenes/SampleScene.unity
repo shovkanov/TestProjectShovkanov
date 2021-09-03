@@ -407,7 +407,7 @@ GameObject:
   - component: {fileID: 981732971}
   m_Layer: 0
   m_Name: CONTROLLER
-  m_TagString: CONTROLLER
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -459,9 +459,9 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  _fruitSpawnTimeBaseValue: 3
+  _fruitSpawnTimeBaseValue: 2
   _amountOfFruits: 5
-  _amountOfEnemies: 5
+  _amountOfEnemies: 4
   _curScoreGO: {fileID: 766242189}
   _recordScoreGO: {fileID: 0}
   _fruits: []
