@@ -18,7 +18,7 @@ public class Player : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
-            Move();
+            Run();
         }
         else
         {
@@ -34,19 +34,22 @@ public class Player : MonoBehaviour
         _scale = transform.localScale.x;
     }
 
-    private void Move()
+    private void Run()
     {
         _animator.SetBool("isRunning", true);
         Vector3 cursorPos = Input.mousePosition;
         Vector3 viewport = Camera.main.ScreenToViewportPoint(cursorPos);
 
-        if (viewport.x < 0 || viewport.y < 0 || viewport.x > 1 || viewport.y > 1) return;
+        if (viewport.x < 0 || viewport.y < 0 || viewport.x > 1 || viewport.y > 1)
+        {
+            return;
+        }
 
         Vector2 destination = Camera.main.ScreenToWorldPoint(cursorPos);
-        float distance = Vector3.Distance(transform.position, destination);
+        //float distance = Vector3.Distance(transform.position, destination);
 
         transform.position = Vector2.MoveTowards(transform.position, destination, _speed * Time.deltaTime);
-        transform.localScale = destination.x > transform.position.x ? new Vector3(_scale, transform.localScale.y, transform.localScale.z) : new Vector3(-_scale, transform.localScale.y, transform.localScale.z);
+        transform.localScale = destination.x > transform.position.x ? new Vector3(-_scale, transform.localScale.y, transform.localScale.z) : new Vector3(_scale, transform.localScale.y, transform.localScale.z);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

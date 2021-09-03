@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameFlowController : MonoBehaviour
 {
+    [SerializeField] private GameObject _mainMenuGO;
     [SerializeField] private Transform _hpBarGO;
     [SerializeField] private GameObject _healthIconPrefab;
     [SerializeField] private Transform _envGO;
@@ -14,13 +16,14 @@ public class GameFlowController : MonoBehaviour
 
     [SerializeField] private int _maxHealth = 3;
     [SerializeField] private int _curHealth;
-    private GameObject[] _HealthGO;
+    [SerializeField] private GameObject[] _HealthGO;
 
     [SerializeField] private float _fruitSpawnTimeBaseValue = 3;
     [SerializeField] private int _amountOfFruits;
     [SerializeField] private int _amountOfEnemies = 3;
 
     private int _curGameScore;
+    [SerializeField] private GameObject _curScoreGO, _recordScoreGO;
 
     private Player _player;
 
@@ -30,6 +33,9 @@ public class GameFlowController : MonoBehaviour
     [ContextMenu("Game Init")]
     public void GameInit()
     {
+        _mainMenuGO.SetActive(false);
+        _curGameScore = 0;
+        _curScoreGO.GetComponent<Text>().text = _curGameScore.ToString();
         HealthInit();
         PlayerInit();
         EnemiesInit();
@@ -38,6 +44,7 @@ public class GameFlowController : MonoBehaviour
 
     private void HealthInit()
     {
+        _curHealth = _maxHealth;
         _HealthGO = new GameObject[_maxHealth];
         for (int i = 0; i < _maxHealth; i++)
         {
@@ -57,10 +64,7 @@ public class GameFlowController : MonoBehaviour
     {
         for (int i = 0; i < _amountOfEnemies; i++)
         {
-            float spawnY = Random.Range(Camera.main.ScreenToWorldPoint(new Vector2(0, 0)).y, Camera.main.ScreenToWorldPoint(new Vector2(0, Screen.height)).y);
-            float spawnX = Random.Range(Camera.main.ScreenToWorldPoint(new Vector2(0, 0)).x, Camera.main.ScreenToWorldPoint(new Vector2(Screen.width, 0)).x);
-
-            Vector2 spawnPosition = new Vector2(spawnX, spawnY);
+            Vector2 spawnPosition = Util.GenerateRandomCoordinatesInVieport();
             Enemy enemy = Instantiate(_enemyPrefab, spawnPosition, Quaternion.identity, _envGO).GetComponent<Enemy>();
 
             _enemies.Add(enemy);
@@ -73,10 +77,7 @@ public class GameFlowController : MonoBehaviour
         {
             if (_fruits.Count < _amountOfFruits)
             {
-                float spawnY = Random.Range(Camera.main.ScreenToWorldPoint(new Vector2(0, 0)).y, Camera.main.ScreenToWorldPoint(new Vector2(0, Screen.height)).y);
-                float spawnX = Random.Range(Camera.main.ScreenToWorldPoint(new Vector2(0, 0)).x, Camera.main.ScreenToWorldPoint(new Vector2(Screen.width, 0)).x);
-
-                Vector2 spawnPosition = new Vector2(spawnX, spawnY);
+                Vector2 spawnPosition = Util.GenerateRandomCoordinatesInVieport();
                 Fruit fruit = Instantiate(_fruitPrefab, spawnPosition, Quaternion.identity, _envGO).GetComponent<Fruit>();
                 fruit.SetupFruit(_listOfFruitSprites[Random.Range(0, _listOfFruitSprites.Count)]);
                 _fruits.Add(fruit);
@@ -87,19 +88,41 @@ public class GameFlowController : MonoBehaviour
 
     private void EnemyHit()
     {
-        Destroy(_HealthGO[_curHealth].gameObject);
-        _HealthGO[_curHealth] = null;
+        Destroy(_HealthGO[_curHealth - 1].gameObject);
+        _HealthGO[_curHealth - 1] = null;
         _curHealth--;
         if (_curHealth == 0)
         {
-
+            EndGame();
         }
     }
 
     private void FruitHit(Fruit fruit)
     {
         _curGameScore++;
+        _curScoreGO.GetComponent<Text>().text = _curGameScore.ToString();
         _fruits.Remove(fruit);
         Destroy(fruit.gameObject);
+    }
+
+    private void EndGame()
+    {
+        StopAllCoroutines();
+        _mainMenuGO.SetActive(true);
+        Destroy(_player.gameObject);
+        foreach (Fruit fruit in _fruits)
+        {
+            if (fruit != null)
+            {
+                Destroy(fruit.gameObject);
+            }  
+        }
+        _fruits.Clear();
+        foreach (Enemy enemy in _enemies)
+        {
+            Destroy(enemy.gameObject);
+        }
+        _enemies.Clear();
+        _curGameScore = 0;
     }
 }
